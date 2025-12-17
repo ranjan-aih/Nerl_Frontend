@@ -123,21 +123,21 @@ dcb-bank-chatbot-admin-frontend/
 
 ###🤝 Contributing
 
-##1.Fork the repo
+1.Fork the repo
 
-##2.Create a new branch
+2.Create a new branch
 ```bash
 git checkout -b feature/new-module
 ```
 
-##3. Commit changes
+3. Commit changes
 
 ```bash
 git commit -m "feat: add new module"
 
 ```
 
-##4.Push & open a PR
+4.Push & open a PR
 
 
 Project maintained with ❤️ by **[ai-horizon.io](https://ai-horizon.io/)**
