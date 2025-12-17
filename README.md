@@ -1,4 +1,4 @@
-# 🏦 SK Finance
+111111111111111111111111111111111111111111111111111111111# 🏦 SK Finance
 
 **SK Finance** is a centralized, high-speed interface for **document verification**. It allows administrators to upload **Photo** and **Signature** documents, compare them with **reference images**, and instantly view whether they **match or not** with a **confidence score**, **pixel difference**, and **stroke analysis**. The platform also maintains upload history, generates verification reports, and provides cost tracking.
 
@@ -101,18 +101,24 @@ npm run build
 
 ###📂 Project Structure
 
-sk-finance-frontend/
-├── public/                 # Static assets
+```text
+dcb-bank-chatbot-admin-frontend/
+├── public/                # Static assets (index.html, favicon)
 ├── src/
-│   ├── assets/             # Images, logos, icons
-│   ├── components/         # Reusable UI components (tables, dialogs, cards)
-│   ├── pages/              # Route pages (Upload, History, Report, Cost Analysis)
-│   ├── services/           # API calls (upload, compare, history, reports)
-│   ├── utils/              # Helpers (formatters, constants)
-│   ├── styles/             # Global styles + Tailwind directives
-│   ├── App.jsx             # App entry / routing wrapper
-│   └── main.jsx            # React root
-└── package.json
+│   ├── assets/            # Images, custom fonts, brand assets
+│   ├── components/        # Reusable UI elements (Button, Card, Table)
+│   ├── features/          # Feature-specific logic
+│   │   ├── analytics/     # Dashboard graphs and cost metrics
+│   │   ├── chats/         # Session history and transcript auditing
+│   │   └── documents/     # FAQ upload and document history management
+│   ├── pages/             # Route components (Dashboard.jsx, Login.jsx)
+│   ├── store/             # Redux setup, slices, and store configuration
+│   ├── services/          # API integration for cost tracking and document processing
+│   ├── styles/            # Global CSS and Tailwind directives
+│   ├── utils/             # Helper functions, currency formatters, constants
+│   └── App.jsx            # Main router component
+└── vite.config.js         # Vite configuration
+```
 
 
 ###🤝 Contributing
@@ -134,4 +140,4 @@ git commit -m "feat: add new module"
 ##4.Push & open a PR
 
 
-**Project maintained by SK Finance.**
+Project maintained with ❤️ by **[ai-horizon.io](https://ai-horizon.io/)**
