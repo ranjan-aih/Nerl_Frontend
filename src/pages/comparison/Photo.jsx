@@ -101,8 +101,10 @@ export default function Photo() {
     try {
       const res = await getRecentUploads();
 
-      if (res?.data?.success) {
-        const { referenceFiles = [], providedFiles = [] } = res.data;
+      console.log('res ---> ', res);
+
+      if (res?.success) {
+        const { referenceFiles = [], providedFiles = [] } = res;
 
         const mapFile = (f) => ({
           name: f.name || f.storedName || 'Unnamed',
@@ -175,7 +177,7 @@ export default function Photo() {
     } catch (err) {
       console.error(
         'Error loading photo comparison state from localStorage:',
-        err
+        err,
       );
       setIsHydrated(true);
     }
@@ -191,13 +193,13 @@ export default function Photo() {
       compareResult.raw_response.files
     ) {
       const filenamesFromResult = compareResult.raw_response.files.map(
-        (f) => f.filename
+        (f) => f.filename,
       );
 
       const reconstructed = availableFiles.provided.filter((f) =>
         filenamesFromResult.some(
-          (fn) => f.name === fn || f.name.includes(fn.split('-')[0])
-        )
+          (fn) => f.name === fn || f.name.includes(fn.split('-')[0]),
+        ),
       );
 
       if (reconstructed.length > 0) {
@@ -220,7 +222,7 @@ export default function Photo() {
     ) {
       const updatedProvided = providedFiles.map((oldFile) => {
         const freshFile = availableFiles.provided.find(
-          (f) => f.url === oldFile.url
+          (f) => f.url === oldFile.url,
         );
         if (freshFile) {
           return {
@@ -261,7 +263,7 @@ export default function Photo() {
     } catch (err) {
       console.error(
         'Error saving photo comparison state to localStorage:',
-        err
+        err,
       );
     }
   }, [
@@ -286,13 +288,13 @@ export default function Photo() {
   // 🔹 Navigation handlers for provided images
   const handlePrevProvided = () => {
     setCurrentProvidedIndex((prev) =>
-      prev === 0 ? providedFiles.length - 1 : prev - 1
+      prev === 0 ? providedFiles.length - 1 : prev - 1,
     );
   };
 
   const handleNextProvided = () => {
     setCurrentProvidedIndex((prev) =>
-      prev === providedFiles.length - 1 ? 0 : prev + 1
+      prev === providedFiles.length - 1 ? 0 : prev + 1,
     );
   };
 
@@ -309,7 +311,7 @@ export default function Photo() {
     } catch (err) {
       console.error(
         'Error clearing photo comparison state from localStorage:',
-        err
+        err,
       );
     }
   };
@@ -347,7 +349,7 @@ export default function Photo() {
   // Confirm provided selected files
   const handleConfirmProvidedSelection = () => {
     const selectedFiles = availableFiles.provided.filter((f) =>
-      tempProvidedSelection.includes(f.url)
+      tempProvidedSelection.includes(f.url),
     );
     setProvidedFiles(selectedFiles);
     setCurrentProvidedIndex(0);
@@ -919,7 +921,7 @@ export default function Photo() {
                                           >
                                             {diff}
                                           </li>
-                                        )
+                                        ),
                                       )}
                                     </ul>
                                   </div>

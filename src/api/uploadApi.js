@@ -1,61 +1,180 @@
-import axiosInstance from './axiosInstance';
+// import axiosInstance from './axiosInstance';
 
-// Base URL without `/api` – handy for building file URLs in UI
-export const API_BASE_URL = axiosInstance.defaults.baseURL.replace(
-  /\/api$/,
-  ''
-);
+// export const API_BASE_URL =
+//   axiosInstance.defaults.baseURL?.replace(/\/api$/, '') || '';
 
-export const uploadFile = (file, fileType, slot) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('label', file.name);
+// const UPLOAD_PATHS = {
+//   photo: 'photos',
+//   signature: 'signatures',
+//   video: 'videos',
+// };
 
-  // Decide path based on type
-  const typePath = fileType === 'signature' ? 'signatures' : 'photos';
+// const getUploadPath = (fileType) => {
+//   if (!UPLOAD_PATHS[fileType]) {
+//     throw new Error(`Invalid file type: ${fileType}`);
+//   }
+//   return UPLOAD_PATHS[fileType];
+// };
 
-  return axiosInstance.post(`/upload/${typePath}/${slot}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-};
+// export const uploadFiles = async (
+//   files,
+//   fileType,
+//   category,
+//   onProgress = null,
+// ) => {
+//   const typePath = getUploadPath(fileType);
 
-export const getRecentUploads = () => {
-  return axiosInstance.get('/uploads/recent');
-};
+//   const formData = new FormData();
 
-// export const verifySignature = async (referenceUrl, providedUrl) => {
+//   const fileArray = Array.isArray(files) ? files : [files];
+
+//   fileArray.forEach((file) => {
+//     formData.append('files', file);
+//   });
+
+//   formData.append('category', category);
+//   formData.append('fileType', fileType);
+
+//   console.log('formdata ---> ', formData);
+
 //   try {
-//     // Fetch the actual files from the URLs
-//     const [refResponse, provResponse] = await Promise.all([
-//       fetch(referenceUrl),
-//       fetch(providedUrl),
-//     ]);
+//     const response = await axiosInstance.post(
+//       `/upload/${typePath}/${category}`,
+//       formData,
+//       {
+//         headers: {
+//           'Content-Type': 'multipart/form-data',
+//         },
+//         onUploadProgress: (progressEvent) => {
+//           if (onProgress) {
+//             const percent = Math.round(
+//               (progressEvent.loaded * 100) / progressEvent.total,
+//             );
+//             onProgress(percent);
+//           }
+//         },
+//       },
+//     );
 
-//     const refBlob = await refResponse.blob();
-//     const provBlob = await provResponse.blob();
-
-//     // Extract filenames from URLs
-//     const refFilename = referenceUrl.split('/').pop() || 'reference.jpg';
-//     const provFilename = providedUrl.split('/').pop() || 'provided.jpg';
-
-//     // Create FormData with actual file blobs
-//     const formData = new FormData();
-//     formData.append('reference_signature', refBlob, refFilename);
-//     formData.append('file', provBlob, provFilename);
-
-//     const res = await axiosInstance.post('/verify-signature', formData, {
-//       headers: { 'Content-Type': 'multipart/form-data' },
-//     });
-
-//     return res;
+//     return response.data;
 //   } catch (error) {
-//     console.error('Error in verifySignature:', error);
-//     throw error;
+//     throw error.response?.data || error;
 //   }
 // };
 
-export const deleteUpload = (id, type) => {
-  return axiosInstance.delete(`/uploads/${type}/${id}`);
+// export const getRecentUploads = async () => {
+//   try {
+//     const response = await axiosInstance.get('/uploads/recent');
+
+//     console.log('Recent uploads:', response);
+
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error fetching recent uploads:', error);
+//     throw error.response?.data || error;
+//   }
+// };
+
+// export const deleteUpload = async (id, category, filename) => {
+//   try {
+//     if (!UPLOAD_PATHS[category]) {
+//       throw new Error('Invalid file category');
+//     }
+
+//     console.log(`Deleting upload with id: ${id} and category: ${category}`);
+
+//     const response = await axiosInstance.delete(`/delete/${category}/${id}`, {
+//       data: {
+//         name: filename,
+//       },
+//     });
+
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error;
+//   }
+// };
+
+import axiosInstance from './axiosInstance';
+
+export const API_BASE_URL =
+  axiosInstance.defaults.baseURL?.replace(/\/api$/, '') || '';
+
+const UPLOAD_PATHS = {
+  photo: 'photos',
+  signature: 'signatures',
+  video: 'videos',
+};
+
+const getUploadPath = (fileType) => {
+  if (!UPLOAD_PATHS[fileType]) {
+    throw new Error(`Invalid file type: ${fileType}`);
+  }
+  return UPLOAD_PATHS[fileType];
+};
+
+export const uploadFiles = async (
+  files,
+  fileType,
+  category,
+  onProgress = null,
+) => {
+  const typePath = getUploadPath(fileType);
+
+  const formData = new FormData();
+
+  const fileArray = Array.isArray(files) ? files : [files];
+
+  fileArray.forEach((file) => {
+    formData.append('files', file);
+  });
+
+  formData.append('category', category);
+  formData.append('fileType', fileType);
+
+  try {
+    const response = await axiosInstance.post(
+      `/upload/${typePath}/${category}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          if (onProgress) {
+            const percent = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total,
+            );
+            onProgress(percent);
+          }
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const getRecentUploads = async () => {
+  try {
+    const response = await axiosInstance.get('/uploads/recent');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching recent uploads:', error);
+    throw error.response?.data || error;
+  }
+};
+
+export const deleteUpload = async (id, category) => {
+  try {
+    console.log(`Deleting upload with id: ${id} and category: ${category}`);
+
+    const response = await axiosInstance.delete(`/delete/${category}/${id}`);
+
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
 };

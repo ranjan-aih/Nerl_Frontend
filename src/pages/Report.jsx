@@ -298,7 +298,7 @@ const Report = () => {
       marginLeft,
       y,
       maxWidth,
-      lineHeight
+      lineHeight,
     );
     y = addWrappedText(
       doc,
@@ -306,7 +306,7 @@ const Report = () => {
       marginLeft,
       y,
       maxWidth,
-      lineHeight
+      lineHeight,
     );
     y = addWrappedText(
       doc,
@@ -314,7 +314,7 @@ const Report = () => {
       marginLeft,
       y,
       maxWidth,
-      lineHeight
+      lineHeight,
     );
     y = addWrappedText(
       doc,
@@ -322,7 +322,7 @@ const Report = () => {
       marginLeft,
       y,
       maxWidth,
-      lineHeight
+      lineHeight,
     );
     y = addWrappedText(
       doc,
@@ -330,7 +330,7 @@ const Report = () => {
       marginLeft,
       y,
       maxWidth,
-      lineHeight
+      lineHeight,
     );
 
     if (providedNames.length === 0) {
@@ -340,7 +340,7 @@ const Report = () => {
         marginLeft,
         y,
         maxWidth,
-        lineHeight
+        lineHeight,
       );
     } else {
       y = addWrappedText(
@@ -349,7 +349,7 @@ const Report = () => {
         marginLeft,
         y,
         maxWidth,
-        lineHeight
+        lineHeight,
       );
       providedNames.forEach((name, idx) => {
         y = addWrappedText(
@@ -358,7 +358,7 @@ const Report = () => {
           marginLeft + 4,
           y,
           maxWidth - 4,
-          lineHeight
+          lineHeight,
         );
       });
     }
@@ -398,7 +398,7 @@ const Report = () => {
             xBase,
             y,
             innerWidth,
-            lineHeight
+            lineHeight,
           );
         } else if (d && typeof d === 'object') {
           y = addWrappedText(
@@ -407,7 +407,7 @@ const Report = () => {
             xBase,
             y,
             innerWidth,
-            lineHeight
+            lineHeight,
           );
 
           const xChild = xBase + baseIndentMm;
@@ -424,7 +424,7 @@ const Report = () => {
               xChild,
               y,
               childWidth,
-              lineHeight
+              lineHeight,
             );
           }
           if (description) {
@@ -434,7 +434,7 @@ const Report = () => {
               xChild,
               y,
               childWidth,
-              lineHeight
+              lineHeight,
             );
           }
 
@@ -448,7 +448,7 @@ const Report = () => {
               xChild,
               y,
               childWidth,
-              lineHeight
+              lineHeight,
             );
           });
         } else {
@@ -458,7 +458,7 @@ const Report = () => {
             xBase,
             y,
             innerWidth,
-            lineHeight
+            lineHeight,
           );
         }
       });
@@ -491,7 +491,7 @@ const Report = () => {
             xBase,
             y,
             innerWidth,
-            lineHeight
+            lineHeight,
           );
         } else if (d && typeof d === 'object') {
           y = addWrappedText(
@@ -500,7 +500,7 @@ const Report = () => {
             xBase,
             y,
             innerWidth,
-            lineHeight
+            lineHeight,
           );
 
           const xChild = xBase + baseIndentMm;
@@ -513,7 +513,7 @@ const Report = () => {
               xChild,
               y,
               childWidth,
-              lineHeight
+              lineHeight,
             );
           }
 
@@ -527,7 +527,7 @@ const Report = () => {
               xChild,
               y,
               childWidth,
-              lineHeight
+              lineHeight,
             );
           });
         } else {
@@ -537,7 +537,7 @@ const Report = () => {
             xBase,
             y,
             innerWidth,
-            lineHeight
+            lineHeight,
           );
         }
       });
@@ -554,7 +554,7 @@ const Report = () => {
         marginLeft,
         y,
         maxWidth,
-        lineHeight
+        lineHeight,
       );
     } else if (log.type === 'signature' && Array.isArray(py.files)) {
       py.files.forEach((file, fileIdx) => {
@@ -578,7 +578,7 @@ const Report = () => {
           marginLeft,
           y,
           maxWidth,
-          lineHeight
+          lineHeight,
         );
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
@@ -617,7 +617,7 @@ const Report = () => {
             marginLeft + 4,
             y,
             maxWidth - 4,
-            lineHeight
+            lineHeight,
           );
 
           doc.setTextColor(0, 0, 0);
@@ -661,8 +661,8 @@ const Report = () => {
         const innerPhotos = Array.isArray(file.photos)
           ? file.photos
           : Array.isArray(py.photos[0]?.photos)
-          ? py.photos[0].photos
-          : [];
+            ? py.photos[0].photos
+            : [];
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
@@ -673,7 +673,7 @@ const Report = () => {
           marginLeft,
           y,
           maxWidth,
-          lineHeight
+          lineHeight,
         );
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
@@ -712,7 +712,7 @@ const Report = () => {
             marginLeft + 4,
             y,
             maxWidth - 4,
-            lineHeight
+            lineHeight,
           );
 
           doc.setTextColor(0, 0, 0);
@@ -744,6 +744,95 @@ const Report = () => {
 
         y += 3;
       });
+    } else if (log.type === 'video') {
+      const liveness = py?.liveness_score ?? log.liveness_score ?? null;
+      const confidence = py?.confidence_score ?? log.confidence_score ?? null;
+      const cost = py?.cost ?? log.totalCost ?? null;
+      const imageBase64 = py?.photo ?? log.image ?? null;
+
+      if (y > 275) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(15, 23, 42);
+
+      y = addWrappedText(
+        doc,
+        'Video Liveness Analysis',
+        marginLeft,
+        y,
+        maxWidth,
+        lineHeight,
+      );
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+
+      if (liveness != null) {
+        y = addWrappedText(
+          doc,
+          `Liveness Score: ${Number(liveness).toFixed(2)}%`,
+          marginLeft,
+          y,
+          maxWidth,
+          lineHeight,
+        );
+      }
+
+      if (confidence != null) {
+        y = addWrappedText(
+          doc,
+          `Confidence Score: ${Number(confidence).toFixed(2)}%`,
+          marginLeft,
+          y,
+          maxWidth,
+          lineHeight,
+        );
+      }
+
+      if (cost != null) {
+        y = addWrappedText(
+          doc,
+          `Processing Cost: ${cost}`,
+          marginLeft,
+          y,
+          maxWidth,
+          lineHeight,
+        );
+      }
+
+      y += 6;
+
+      // Add frame image if available
+      if (imageBase64) {
+        try {
+          if (y > 200) {
+            doc.addPage();
+            y = 20;
+          }
+
+          doc.setFont('helvetica', 'bold');
+          doc.text('Captured Frame:', marginLeft, y);
+          y += 6;
+
+          doc.addImage(
+            imageBase64,
+            'JPEG', // or 'PNG' depending on your format
+            marginLeft,
+            y,
+            80,
+            60,
+          );
+
+          y += 70;
+        } catch (err) {
+          console.error('Error adding video frame image to PDF:', err);
+        }
+      }
     } else {
       y = addWrappedText(
         doc,
@@ -751,7 +840,7 @@ const Report = () => {
         marginLeft,
         y,
         maxWidth,
-        lineHeight
+        lineHeight,
       );
     }
 
@@ -784,7 +873,7 @@ const Report = () => {
   const totalComparisons = logs.length;
   const photoComparisonCount = logs.filter((l) => l.type === 'photo').length;
   const signatureComparisonCount = logs.filter(
-    (l) => l.type === 'signature'
+    (l) => l.type === 'signature',
   ).length;
 
   return (
@@ -976,8 +1065,8 @@ const Report = () => {
                                   log.type === 'photo'
                                     ? 'primary'
                                     : log.type === 'signature'
-                                    ? 'secondary'
-                                    : 'default'
+                                      ? 'secondary'
+                                      : 'default'
                                 }
                                 variant='outlined'
                               />
@@ -987,7 +1076,7 @@ const Report = () => {
                             <TableCell
                               onClick={() =>
                                 setExpandedRef(
-                                  expandedRef === log._id ? null : log._id
+                                  expandedRef === log._id ? null : log._id,
                                 )
                               }
                               style={{ cursor: 'pointer' }}
@@ -1013,7 +1102,7 @@ const Report = () => {
                             <TableCell
                               onClick={() =>
                                 setExpandedProvided(
-                                  expandedProvided === log._id ? null : log._id
+                                  expandedProvided === log._id ? null : log._id,
                                 )
                               }
                               style={{ cursor: 'pointer' }}

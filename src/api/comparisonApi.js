@@ -1,4 +1,3 @@
-// uploadApi.js (or photoApi.js)
 import axiosInstance from './axiosInstance';
 
 // Small helper: get a filename from a URL
@@ -13,50 +12,43 @@ export const verifyPhoto = async (referenceUrl, providedUrls) => {
   try {
     console.log('verifyPhoto() called with:', { referenceUrl, providedUrls });
 
-    // Always work with an array internally
     const providedList = Array.isArray(providedUrls)
       ? providedUrls
       : [providedUrls];
 
-    // 1️⃣ Fetch the reference image
     const refResponse = await fetch(referenceUrl);
     if (!refResponse.ok) {
       throw new Error(
-        `Failed to load reference image: ${refResponse.status} ${refResponse.statusText}`
+        `Failed to load reference image: ${refResponse.status} ${refResponse.statusText}`,
       );
     }
     const refBlob = await refResponse.blob();
 
-    // 2️⃣ Fetch all provided images
     const providedBlobs = [];
     for (const url of providedList) {
       const resp = await fetch(url);
       if (!resp.ok) {
         throw new Error(
-          `Failed to load provided image: ${resp.status} ${resp.statusText}`
+          `Failed to load provided image: ${resp.status} ${resp.statusText}`,
         );
       }
       const blob = await resp.blob();
       providedBlobs.push({ url, blob });
     }
 
-    // 3️⃣ Build FormData for backend
     const formData = new FormData();
 
-    // Reference photo field → "reference_photo"
     const refFilename = getFilenameFromUrl(referenceUrl, 'reference.jpg');
     formData.append('reference_photo', refBlob, refFilename);
 
-    // Provided photo(s) field → "file"
     providedBlobs.forEach((item, index) => {
       const filename = getFilenameFromUrl(
         item.url,
-        `provided_${index + 1}.jpg`
+        `provided_${index + 1}.jpg`,
       );
       formData.append('file', item.blob, filename);
     });
 
-    // 4️⃣ Call Node backend: POST /api/verify-photo
     const res = await axiosInstance.post('/verify-photo', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -85,7 +77,7 @@ export const verifySignature = async (referenceUrl, providedUrls) => {
     const refResponse = await fetch(referenceUrl);
     if (!refResponse.ok) {
       throw new Error(
-        `Failed to load reference signature: ${refResponse.status} ${refResponse.statusText}`
+        `Failed to load reference signature: ${refResponse.status} ${refResponse.statusText}`,
       );
     }
     const refBlob = await refResponse.blob();
@@ -99,14 +91,14 @@ export const verifySignature = async (referenceUrl, providedUrls) => {
 
     // --- Fetch all provided files ---
     const providedResponses = await Promise.all(
-      providedList.map((url) => fetch(url))
+      providedList.map((url) => fetch(url)),
     );
 
     await Promise.all(
       providedResponses.map(async (resp, idx) => {
         if (!resp.ok) {
           throw new Error(
-            `Failed to load provided signature: ${resp.status} ${resp.statusText}`
+            `Failed to load provided signature: ${resp.status} ${resp.statusText}`,
           );
         }
 
@@ -119,7 +111,7 @@ export const verifySignature = async (referenceUrl, providedUrls) => {
             : `provided_${idx + 1}.jpg`;
 
         formData.append('file', provBlob, provFilename);
-      })
+      }),
     );
 
     const res = await axiosInstance.post('/verify-signature', formData, {
@@ -131,4 +123,37 @@ export const verifySignature = async (referenceUrl, providedUrls) => {
     console.error('Error in verifySignature:', error);
     throw error;
   }
+};
+
+export const verifyVideo = async (referenceUrl, providedUrls) => {
+  const formData = new FormData();
+
+  // 🔹 Convert reference URL → File
+  const refResponse = await fetch(referenceUrl);
+  const refBlob = await refResponse.blob();
+  const refFile = new File([refBlob], 'reference.jpg', {
+    type: refBlob.type,
+  });
+
+  formData.append('reference_image', refFile);
+
+  // 🔹 Convert each provided video URL → File
+  for (let i = 0; i < providedUrls.length; i++) {
+    const videoResponse = await fetch(providedUrls[i]);
+    const videoBlob = await videoResponse.blob();
+
+    const videoFile = new File([videoBlob], `video_${i}.mp4`, {
+      type: videoBlob.type,
+    });
+
+    formData.append('video', videoFile);
+  }
+
+  return axiosInstance.post(`/verify-video`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    withCredentials: true,
+    timeout: 5 * 60 * 1000,
+  });
 };

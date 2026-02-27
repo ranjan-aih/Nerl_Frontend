@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { API_BASE_URL, getRecentUploads } from '../../api/uploadApi';
 import { verifySignature } from '../../api/comparisonApi';
 
+import { LiaFileSignatureSolid } from 'react-icons/lia';
+
 import {
   Button,
   CircularProgress,
@@ -72,8 +74,8 @@ export default function Signature() {
     try {
       const res = await getRecentUploads();
 
-      if (res?.data?.success) {
-        let { referenceFiles = [], providedFiles = [], files = [] } = res.data;
+      if (res?.success) {
+        let { referenceFiles = [], providedFiles = [], files = [] } = res;
 
         if (
           !referenceFiles.length &&
@@ -85,10 +87,10 @@ export default function Signature() {
             (f) =>
               f.kind === 'reference' ||
               f.kind === 'refrence' || // typo-safe
-              f.kind === 'signature_reference'
+              f.kind === 'signature_reference',
           );
           providedFiles = files.filter(
-            (f) => f.kind === 'provided' || f.kind === 'signature_provided'
+            (f) => f.kind === 'provided' || f.kind === 'signature_provided',
           );
         }
 
@@ -164,7 +166,7 @@ export default function Signature() {
     } catch (err) {
       console.error(
         'Error loading signature comparison state from localStorage:',
-        err
+        err,
       );
       setIsHydrated(true);
     }
@@ -180,13 +182,13 @@ export default function Signature() {
       compareResult.raw_response.files
     ) {
       const filenamesFromResult = compareResult.raw_response.files.map(
-        (f) => f.filename
+        (f) => f.filename,
       );
 
       const reconstructed = availableFiles.provided.filter((f) =>
         filenamesFromResult.some(
-          (fn) => f.name === fn || f.name.includes(fn.split('-')[0])
-        )
+          (fn) => f.name === fn || f.name.includes(fn.split('-')[0]),
+        ),
       );
 
       if (reconstructed.length > 0) {
@@ -209,7 +211,7 @@ export default function Signature() {
     ) {
       const updatedProvided = providedFiles.map((oldFile) => {
         const freshFile = availableFiles.provided.find(
-          (f) => f.url === oldFile.url
+          (f) => f.url === oldFile.url,
         );
         if (freshFile) {
           return {
@@ -250,7 +252,7 @@ export default function Signature() {
     } catch (err) {
       console.error(
         'Error saving signature comparison state to localStorage:',
-        err
+        err,
       );
     }
   }, [
@@ -294,7 +296,7 @@ export default function Signature() {
   // Confirm provided selected files
   const handleConfirmProvidedSelection = () => {
     const selectedFiles = availableFiles.provided.filter((f) =>
-      tempProvidedSelection.includes(f.url)
+      tempProvidedSelection.includes(f.url),
     );
     setProvidedFiles(selectedFiles);
     setCurrentProvidedIndex(0);
@@ -402,7 +404,8 @@ export default function Signature() {
           onClick={() => handleOpenDialog('reference')}
           className='border-2 border-dashed border-gray-300 rounded-xl text-center text-gray-500 h-[260px] flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition'
         >
-          <span className='text-[32px] mb-2'>📁</span>
+          {/* <span className='text-[32px] mb-2'> </span>  */}
+          <LiaFileSignatureSolid size={40} />
           <p className='mt-1 font-semibold text-[18px]'>
             Click here to select Reference Signature
           </p>
@@ -469,7 +472,8 @@ export default function Signature() {
           onClick={() => handleOpenDialog('provided')}
           className='border-2 border-dashed border-gray-300 rounded-xl text-center text-gray-500 h-[260px] flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition'
         >
-          <span className='text-[32px] mb-2'>📁</span>
+          {/* <span className='text-[32px] mb-2'>📁</span> */}
+          <LiaFileSignatureSolid size={40} />
           <p className='mt-1 font-semibold text-[18px]'>
             Click here to select Provided Signatures
           </p>
@@ -584,7 +588,7 @@ export default function Signature() {
     });
 
     const fileGroups = Object.values(fileGroupsMap).sort(
-      (a, b) => (a.fileIndex ?? 0) - (b.fileIndex ?? 0)
+      (a, b) => (a.fileIndex ?? 0) - (b.fileIndex ?? 0),
     );
 
     // Best match across all
@@ -641,7 +645,7 @@ export default function Signature() {
               }
               const description = diff.description || '';
               const mainKey = Object.keys(diff).find(
-                (k) => k !== 'description'
+                (k) => k !== 'description',
               );
               const mainValue = mainKey ? diff[mainKey] : '';
               return (
@@ -949,7 +953,7 @@ export default function Signature() {
                                       </summary>
                                       <div className='border-t border-gray-200 px-3 py-2'>
                                         {renderBulletList(
-                                          report.pixelDifferences
+                                          report.pixelDifferences,
                                         )}
                                       </div>
                                     </details>
@@ -964,19 +968,19 @@ export default function Signature() {
                                     <div className='border-t border-gray-200 px-3 py-3 space-y-3'>
                                       {strokePoints.differences &&
                                         renderDifferences(
-                                          strokePoints.differences
+                                          strokePoints.differences,
                                         )}
 
                                       {strokePoints.reference_signature &&
                                         renderStrokes(
                                           strokePoints.reference_signature,
-                                          'Reference Signature Strokes'
+                                          'Reference Signature Strokes',
                                         )}
 
                                       {strokePoints.document_signature &&
                                         renderStrokes(
                                           strokePoints.document_signature,
-                                          'Document Signature Strokes'
+                                          'Document Signature Strokes',
                                         )}
                                     </div>
                                   </details>
@@ -1066,7 +1070,7 @@ export default function Signature() {
           className={`inline-flex items-center gap-2 rounded-full px-8 py-3 font-semibold text-white shadow-md transition text-[18px] ${
             !referenceFile || !providedFiles.length || compareLoading
               ? 'cursor-not-allowed bg-gray-400'
-              : 'bg-blue-600 hover:bg-blue-700'
+              : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
           }`}
         >
           {compareLoading ? <Spinner size={20} /> : <span>⇄</span>}
@@ -1096,7 +1100,7 @@ export default function Signature() {
 
         {compareLoading && (
           <div className='py-6 text-center'>
-            <Spinner size={28} />
+            {/* <Spinner size={28} /> */}
             <p className='mt-2 text-gray-600 text-[16px]'>
               Analyzing signatures...
             </p>

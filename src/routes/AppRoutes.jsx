@@ -8,6 +8,11 @@ import Photo from '../pages/comparison/Photo';
 import Login from '../pages/Login';
 import CostAnalysis from '../pages/CostAnalysis';
 
+import VideoComparison from '../pages/comparison/Video';
+// import VideoComparison from '../pages/comparison/video/VideoComaprison.jsx';
+
+// import LivenessCapture from '../pages/comparison/LivenessCapture.jsx';
+
 import AuthProvider from '../components/auth/AuthProvider';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 
@@ -27,7 +32,7 @@ const AppRoutes = () => {
               element={isLoggedIn ? <Navigate to='/' replace /> : <Login />}
             />
 
-            {/* Protected Routes - Wrapped in Layout */}
+            {/* Protected Routes */}
             <Route
               element={
                 <ProtectedRoute>
@@ -39,12 +44,13 @@ const AppRoutes = () => {
               <Route path='/upload' element={<Upload />} />
               <Route path='/comparison/photo' element={<Photo />} />
               <Route path='/comparison/signature' element={<Signature />} />
+              <Route path='/comparison/video' element={<VideoComparison />} />
               <Route path='/reports' element={<Report />} />
               <Route path='/cost-analysis' element={<CostAnalysis />} />
               <Route path='/document-library' element={<Report />} />
+              {/* <Route path='/live' element={<LivenessCapture />} /> */}
             </Route>
 
-            {/* Catch All Route - Redirect to home or login */}
             <Route
               path='*'
               element={

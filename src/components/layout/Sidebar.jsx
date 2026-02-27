@@ -9,24 +9,33 @@ import {
   Collapse,
 } from '@mui/material';
 
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
-import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
-import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined';
 import MonochromePhotosIcon from '@mui/icons-material/MonochromePhotos';
 import CompareIcon from '@mui/icons-material/Compare';
 
-import logo from '../../assets/logo.png';
+import { GoVideo } from 'react-icons/go';
+import { FaFileSignature } from 'react-icons/fa6';
+
+import logo from '../../assets/NERL-Logo.png';
 import aihorizonLogo from '../../assets/ai-horizon.iologo.png';
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // const getActiveSubItem = () => {
+  //   if (location.pathname === '/comparison/photo') return 'Photo';
+  //   if (location.pathname === '/comparison/signature') return 'Signature';
+  //   if (location.pathname === '/comparison/video') return 'Video';
+  //   return '';
+  // };
+
   const getActiveSubItem = () => {
-    if (location.pathname === '/comparison/photo') return 'Photo';
-    if (location.pathname === '/comparison/signature') return 'Signature';
+    const parts = location.pathname.split('/');
+    if (parts[1] === 'comparison' && parts[2]) {
+      return parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
+    }
     return '';
   };
 
@@ -38,21 +47,37 @@ export default function Sidebar() {
   const [openDropdown, setOpenDropdown] = useState(getOpenDropdown());
   const [activeSubItem, setActiveSubItem] = useState(getActiveSubItem());
 
+  // useEffect(() => {
+  //   if (location.pathname === '/comparison/photo') {
+  //     setActiveSubItem('Photo');
+  //     setOpenDropdown('Comparison');
+  //   } else if (location.pathname === '/comparison/signature') {
+  //     setActiveSubItem('Signature');
+  //     setOpenDropdown('Comparison');
+  //   } else if (location.pathname === '/comparison/video') {
+  //     setActiveSubItem('Video');
+  //     setOpenDropdown('Comparison');
+  //   } else if (!location.pathname.startsWith('/comparison')) {
+  //     setActiveSubItem('');
+  //     setOpenDropdown(null);
+  //   }
+  // }, [location.pathname]);
+
   useEffect(() => {
-    if (location.pathname === '/comparison/photo') {
-      setActiveSubItem('Photo');
-      setOpenDropdown('Comparison');
-    } else if (location.pathname === '/comparison/signature') {
-      setActiveSubItem('Signature');
-      setOpenDropdown('Comparison');
-    } else if (!location.pathname.startsWith('/comparison')) {
+    if (location.pathname.startsWith('/comparison')) {
+      const parts = location.pathname.split('/');
+      if (parts[2]) {
+        const label = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
+        setActiveSubItem(label);
+        setOpenDropdown('Comparison');
+      }
+    } else {
       setActiveSubItem('');
       setOpenDropdown(null);
     }
   }, [location.pathname]);
 
   const getActiveMainItem = () => {
-    // if (location.pathname === '/') return 'Home';
     if (location.pathname.startsWith('/upload')) return 'Upload';
     if (location.pathname.startsWith('/comparison')) return 'Comparison';
     if (location.pathname.startsWith('/reports')) return 'Reports';
@@ -63,7 +88,6 @@ export default function Sidebar() {
   };
 
   const navItems = [
-    // { label: 'Home', icon: <HomeOutlinedIcon />, path: '/' },
     { label: 'Upload', icon: <UploadFileOutlinedIcon />, path: '/upload' },
     {
       label: 'Comparison',
@@ -76,8 +100,13 @@ export default function Sidebar() {
         },
         {
           label: 'Signature',
-          icon: <BorderColorOutlinedIcon />,
+          icon: <FaFileSignature size={24} />,
           path: '/comparison/signature',
+        },
+        {
+          label: 'Video',
+          icon: <GoVideo size={24} />,
+          path: '/comparison/video',
         },
       ],
     },
@@ -87,11 +116,6 @@ export default function Sidebar() {
       icon: <AssessmentOutlinedIcon />,
       path: '/cost-analysis',
     },
-    // {
-    //   label: 'Document Library',
-    //   icon: <LibraryBooksOutlinedIcon />,
-    //   path: '/document-library',
-    // },
   ];
 
   const active = getActiveMainItem();
@@ -132,11 +156,11 @@ export default function Sidebar() {
         overflow: 'hidden',
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <img
           src={logo}
           alt='logo'
-          style={{ width: '60%', maxWidth: '120px' }}
+          style={{ width: '100%', maxWidth: '150px' }}
         />
       </Box>
 
@@ -194,7 +218,7 @@ export default function Sidebar() {
                         item.label,
                         !!item.subItems,
                         item.subItems,
-                        item.path
+                        item.path,
                       )
                     }
                     sx={{ px: 2, borderRadius: '50px 0px 0px 50px' }}
