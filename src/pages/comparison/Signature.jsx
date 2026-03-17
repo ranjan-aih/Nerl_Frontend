@@ -1122,7 +1122,7 @@ export default function Signature() {
       {openDialog && (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40'>
           <div className='flex max-h-[80vh] w-full max-w-4xl flex-col rounded-xl bg-white shadow-lg'>
-            <div className='flex items-center justify-between border-b px-4 py-3'>
+            <div className='flex items-center justify-between border-b-2 border-gray-400 px-4 py-3'>
               <h3 className='font-semibold text-gray-800 text-[18px]'>
                 Select {dialogType === 'reference' ? 'Reference' : 'Provided'}{' '}
                 Signature
@@ -1133,7 +1133,7 @@ export default function Signature() {
               <button
                 type='button'
                 onClick={() => setOpenDialog(false)}
-                className='text-[20px] leading-none text-gray-500 hover:text-gray-800'
+                className='text-[32px] leading-none text-gray-500 hover:text-gray-800 cursor-pointer px-4 py-1 flex justify-center items-center '
               >
                 ×
               </button>
@@ -1156,7 +1156,7 @@ export default function Signature() {
                   </p>
                 </div>
               ) : (
-                <div className='mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4'>
+                <div className='mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 px-10'>
                   {fileList.map((file) => {
                     if (dialogType === 'reference') {
                       return (
@@ -1183,7 +1183,7 @@ export default function Signature() {
               )}
             </div>
 
-            <div className='flex items-center justify-end gap-2 border-t px-4 py-3'>
+            <div className='flex items-center justify-end gap-2 px-4 py-3'>
               <button
                 type='button'
                 className='rounded-md px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-100 text-[16px]'

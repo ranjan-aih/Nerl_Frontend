@@ -125,29 +125,57 @@ export const verifySignature = async (referenceUrl, providedUrls) => {
   }
 };
 
-export const verifyVideo = async (referenceUrl, providedUrls) => {
+// export const verifyVideo = async (referenceUrl, providedUrls) => {
+//   const formData = new FormData();
+
+//   // 🔹 Convert reference URL → File
+//   const refResponse = await fetch(referenceUrl);
+//   const refBlob = await refResponse.blob();
+//   const refFile = new File([refBlob], 'reference.jpg', {
+//     type: refBlob.type,
+//   });
+
+//   formData.append('reference_image', refFile);
+
+//   // 🔹 Convert each provided video URL → File
+//   for (let i = 0; i < providedUrls.length; i++) {
+//     const videoResponse = await fetch(providedUrls[i]);
+//     const videoBlob = await videoResponse.blob();
+
+//     const videoFile = new File([videoBlob], `video_${i}.mp4`, {
+//       type: videoBlob.type,
+//     });
+
+//     formData.append('video', videoFile);
+//   }
+
+//   return axiosInstance.post(`/verify-video`, formData, {
+//     headers: {
+//       'Content-Type': 'multipart/form-data',
+//     },
+//     withCredentials: true,
+//     timeout: 5 * 60 * 1000,
+//   });
+// };
+
+// In your uploadApi.js — replace the existing verifyVideo function
+
+export const verifyVideo = async (referenceUrl, videoBlob) => {
   const formData = new FormData();
 
-  // 🔹 Convert reference URL → File
+  // Convert reference URL → File
   const refResponse = await fetch(referenceUrl);
   const refBlob = await refResponse.blob();
   const refFile = new File([refBlob], 'reference.jpg', {
-    type: refBlob.type,
+    type: refBlob.type || 'image/jpeg',
   });
-
   formData.append('reference_image', refFile);
 
-  // 🔹 Convert each provided video URL → File
-  for (let i = 0; i < providedUrls.length; i++) {
-    const videoResponse = await fetch(providedUrls[i]);
-    const videoBlob = await videoResponse.blob();
-
-    const videoFile = new File([videoBlob], `video_${i}.mp4`, {
-      type: videoBlob.type,
-    });
-
-    formData.append('video', videoFile);
-  }
+  // Append the blob directly — no fetch needed
+  const videoFile = new File([videoBlob], 'liveness_recording.webm', {
+    type: 'video/webm',
+  });
+  formData.append('video', videoFile);
 
   return axiosInstance.post(`/verify-video`, formData, {
     headers: {

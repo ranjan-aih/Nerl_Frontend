@@ -47,43 +47,55 @@ export default function Sidebar() {
   const [openDropdown, setOpenDropdown] = useState(getOpenDropdown());
   const [activeSubItem, setActiveSubItem] = useState(getActiveSubItem());
 
-  // useEffect(() => {
-  //   if (location.pathname === '/comparison/photo') {
-  //     setActiveSubItem('Photo');
-  //     setOpenDropdown('Comparison');
-  //   } else if (location.pathname === '/comparison/signature') {
-  //     setActiveSubItem('Signature');
-  //     setOpenDropdown('Comparison');
-  //   } else if (location.pathname === '/comparison/video') {
-  //     setActiveSubItem('Video');
-  //     setOpenDropdown('Comparison');
-  //   } else if (!location.pathname.startsWith('/comparison')) {
-  //     setActiveSubItem('');
-  //     setOpenDropdown(null);
-  //   }
-  // }, [location.pathname]);
-
   useEffect(() => {
-    if (location.pathname.startsWith('/comparison')) {
-      const parts = location.pathname.split('/');
-      if (parts[2]) {
-        const label = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
-        setActiveSubItem(label);
-        setOpenDropdown('Comparison');
-      }
-    } else {
+    if (location.pathname === '/comparison/photo') {
+      setActiveSubItem('Photo');
+      setOpenDropdown('Comparison');
+    } else if (location.pathname === '/comparison/signature') {
+      setActiveSubItem('Signature');
+      setOpenDropdown('Comparison');
+    } else if (location.pathname === '/video-kyc') {
+      setActiveSubItem('Video');
+      setOpenDropdown('Comparison');
+    } else if (!location.pathname.startsWith('/comparison')) {
       setActiveSubItem('');
       setOpenDropdown(null);
     }
   }, [location.pathname]);
 
+  // useEffect(() => {
+  //   if (location.pathname.startsWith('/comparison')) {
+  //     const parts = location.pathname.split('/');
+  //     if (parts[2]) {
+  //       const label = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
+  //       setActiveSubItem(label);
+  //       setOpenDropdown('Comparison');
+  //     }
+  //   } else {
+  //     setActiveSubItem('');
+  //     setOpenDropdown(null);
+  //   }
+  // }, [location.pathname]);
+
+  // const getActiveMainItem = () => {
+  //   if (location.pathname.startsWith('/upload')) return 'Upload';
+  //   if (location.pathname.startsWith('/comparison')) return 'Comparison';
+  //   if (location.pathname.startsWith('/reports')) return 'Reports';
+  //   if (location.pathname.startsWith('/cost-analysis')) return 'Cost Analysis';
+  //   if (location.pathname.startsWith('/document-library'))
+  //     return 'Document Library';
+  //   return '';
+  // };
+
   const getActiveMainItem = () => {
     if (location.pathname.startsWith('/upload')) return 'Upload';
-    if (location.pathname.startsWith('/comparison')) return 'Comparison';
+    if (
+      location.pathname.startsWith('/comparison') ||
+      location.pathname.startsWith('/video-kyc')
+    )
+      return 'Comparison';
     if (location.pathname.startsWith('/reports')) return 'Reports';
     if (location.pathname.startsWith('/cost-analysis')) return 'Cost Analysis';
-    if (location.pathname.startsWith('/document-library'))
-      return 'Document Library';
     return '';
   };
 
@@ -106,7 +118,7 @@ export default function Sidebar() {
         {
           label: 'Video',
           icon: <GoVideo size={24} />,
-          path: '/comparison/video',
+          path: '/video-kyc',
         },
       ],
     },

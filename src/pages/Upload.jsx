@@ -343,7 +343,7 @@ const Upload = () => {
               control={<Radio />}
               label='Signature'
             />
-            <FormControlLabel value='video' control={<Radio />} label='Video' />
+            {/* <FormControlLabel value='video' control={<Radio />} label='Video' /> */}
           </RadioGroup>
         </div>
 

@@ -8,10 +8,11 @@ import Photo from '../pages/comparison/Photo';
 import Login from '../pages/Login';
 import CostAnalysis from '../pages/CostAnalysis';
 
-import VideoComparison from '../pages/comparison/Video';
-// import VideoComparison from '../pages/comparison/video/VideoComaprison.jsx';
+import Video from '../pages/comparison/Video';
 
-// import LivenessCapture from '../pages/comparison/LivenessCapture.jsx';
+// import FaceLiveness from '../components/FaceLiveness';
+// import FaceLivenessDetector from '../components/FaceLivenessDetector';
+import VideoKyc from '../pages/comparison/VideoKyc';
 
 import AuthProvider from '../components/auth/AuthProvider';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
@@ -44,11 +45,11 @@ const AppRoutes = () => {
               <Route path='/upload' element={<Upload />} />
               <Route path='/comparison/photo' element={<Photo />} />
               <Route path='/comparison/signature' element={<Signature />} />
-              <Route path='/comparison/video' element={<VideoComparison />} />
+              <Route path='/video-kyc' element={<VideoKyc />} />
               <Route path='/reports' element={<Report />} />
               <Route path='/cost-analysis' element={<CostAnalysis />} />
               <Route path='/document-library' element={<Report />} />
-              {/* <Route path='/live' element={<LivenessCapture />} /> */}
+              {/* <Route path='/live' element={<VideoKyc />} /> */}
             </Route>
 
             <Route

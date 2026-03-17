@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postbuild": "cpy node_modules/@azure/ai-vision-face-ui/facelivenessdetector-assets/**/* public/facelivenessdetector-assets --parents"
   },
   "dependencies": {
+    "@azure/ai-vision-face-ui": "^1.4.7",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.6",

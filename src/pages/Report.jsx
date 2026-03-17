@@ -28,6 +28,24 @@ const typeOptions = [
   { label: 'Signature', value: 'signature' },
 ];
 
+const getBase64ImageFromURL = (url) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.setAttribute('crossOrigin', 'anonymous'); // This handles CORS
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL('image/png');
+      resolve(dataURL);
+    };
+    img.onerror = (error) => reject(error);
+    img.src = url;
+  });
+};
+
 const formatDateTime = (isoString) => {
   if (!isoString) return '-';
   const d = new Date(isoString);
@@ -58,7 +76,7 @@ const getStatusColor = (status) => {
 
   // Matched / verified / accepted → GREEN
   if (
-    s.includes('matched') ||
+    s.includes('MATCH') ||
     s === 'success' ||
     s === 'verified' ||
     s === 'match' ||
@@ -70,7 +88,7 @@ const getStatusColor = (status) => {
   // Rejected / mismatch / failed → RED
   if (
     s.includes('reject') ||
-    s.includes('mismatch') ||
+    s.includes('MISMATCH') ||
     s === 'failed' ||
     s === 'error' ||
     s === 'not_matched' ||
@@ -94,7 +112,7 @@ const getDecisionLabel = (status) => {
     s === 'match' ||
     s === 'accepted'
   ) {
-    return 'ACCEPTED';
+    return 'MATCH';
   }
 
   if (
@@ -105,7 +123,7 @@ const getDecisionLabel = (status) => {
     s === 'not_matched' ||
     s === 'rejected'
   ) {
-    return 'REJECTED';
+    return 'MISMATCH';
   }
 
   return status ? status.toString().toUpperCase() : 'UNKNOWN';
@@ -282,7 +300,7 @@ const Report = () => {
     doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(37, 99, 235); // blue
-    doc.text('1. Request Details', marginLeft, y);
+    doc.text('1. Verification Overview', marginLeft, y);
     y += 3;
     doc.setDrawColor(209, 213, 219); // light gray line
     doc.line(marginLeft, y, marginLeft + 70, y);
@@ -302,20 +320,20 @@ const Report = () => {
     );
     y = addWrappedText(
       doc,
-      `Type: ${log.type || '-'}`,
+      `Comaprison Type: ${log.type || '-'} - kyc`,
       marginLeft,
       y,
       maxWidth,
       lineHeight,
     );
-    y = addWrappedText(
-      doc,
-      `Overall Status: ${headerDecision}`,
-      marginLeft,
-      y,
-      maxWidth,
-      lineHeight,
-    );
+    // y = addWrappedText(
+    //   doc,
+    //   `Overall Status: ${headerDecision}`,
+    //   marginLeft,
+    //   y,
+    //   maxWidth,
+    //   lineHeight,
+    // );
     y = addWrappedText(
       doc,
       `Created At: ${createdAtFormatted}`,
@@ -324,44 +342,44 @@ const Report = () => {
       maxWidth,
       lineHeight,
     );
-    y = addWrappedText(
-      doc,
-      `Reference File: ${request.referenceFileName || '-'}`,
-      marginLeft,
-      y,
-      maxWidth,
-      lineHeight,
-    );
+    // y = addWrappedText(
+    //   doc,
+    //   `Reference File: ${request.referenceFileName || '-'}`,
+    //   marginLeft,
+    //   y,
+    //   maxWidth,
+    //   lineHeight,
+    // );
 
-    if (providedNames.length === 0) {
-      y = addWrappedText(
-        doc,
-        'Provided Files: -',
-        marginLeft,
-        y,
-        maxWidth,
-        lineHeight,
-      );
-    } else {
-      y = addWrappedText(
-        doc,
-        `Provided Files (${providedNames.length}):`,
-        marginLeft,
-        y,
-        maxWidth,
-        lineHeight,
-      );
-      providedNames.forEach((name, idx) => {
-        y = addWrappedText(
-          doc,
-          `• ${idx + 1}. ${name}`,
-          marginLeft + 4,
-          y,
-          maxWidth - 4,
-          lineHeight,
-        );
-      });
-    }
+    // if (providedNames.length === 0) {
+    //   y = addWrappedText(
+    //     doc,
+    //     'Provided Files: -',
+    //     marginLeft,
+    //     y,
+    //     maxWidth,
+    //     lineHeight,
+    //   );
+    // } else {
+    //   y = addWrappedText(
+    //     doc,
+    //     `Provided Files (${providedNames.length}):`,
+    //     marginLeft,
+    //     y,
+    //     maxWidth,
+    //     lineHeight,
+    //   );
+    //   providedNames.forEach((name, idx) => {
+    //     y = addWrappedText(
+    //       doc,
+    //       `• ${idx + 1}. ${name}`,
+    //       marginLeft + 4,
+    //       y,
+    //       maxWidth - 4,
+    //       lineHeight,
+    //     );
+    //   });
+    // }
 
     y += 4;
 
@@ -745,92 +763,161 @@ const Report = () => {
         y += 3;
       });
     } else if (log.type === 'video') {
-      const liveness = py?.liveness_score ?? log.liveness_score ?? null;
-      const confidence = py?.confidence_score ?? log.confidence_score ?? null;
-      const cost = py?.cost ?? log.totalCost ?? null;
-      const imageBase64 = py?.photo ?? log.image ?? null;
+      const videoData = py || {};
+      const statusSource = videoData.status || log.status || '';
+      const decisionLabel = getDecisionLabel(statusSource);
+      const decisionColor = getStatusColor(statusSource);
 
-      if (y > 275) {
-        doc.addPage();
-        y = 20;
-      }
+      const face = videoData.face_verification || {};
+      const docDetails = videoData.document_details || {};
+      const videoDetails = videoData.video_details || {};
+      const verification = videoData.verification || {};
+
+      const faceConfidence =
+        face.confidence_score != null ? Number(face.confidence_score) : null;
+      const cost = videoData.cost ?? log.totalCost ?? null;
+
+      // // --- 1. CLEAN HEADER ---
+      // doc.setFont('helvetica', 'bold');
+      // doc.setFontSize(16); // Large
+      // doc.setTextColor(30, 41, 59); // Dark Slate
+      // doc.text('Video Verification Summary', marginLeft, y);
+      // y += 10;
+
+      // --- 2. LINE-BY-LINE SUMMARY (No Box) ---
+      doc.setFontSize(10);
+
+      // Status Line
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('Status: ', marginLeft, y);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(decisionColor.r, decisionColor.g, decisionColor.b);
+      doc.text(`${decisionLabel}`, marginLeft + 15, y);
+      y += 7;
+
+      // Face Match Line (RAW VALUE, NO %)
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('Confidence: ', marginLeft, y);
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.setTextColor(15, 23, 42);
-
-      y = addWrappedText(
-        doc,
-        'Video Liveness Analysis',
-        marginLeft,
+      doc.text(
+        faceConfidence != null ? faceConfidence.toString() : '0',
+        marginLeft + 25,
         y,
-        maxWidth,
-        lineHeight,
       );
+      y += 7;
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11);
-      doc.setTextColor(0, 0, 0);
+      // Cost Line (4 decimal places)
+      doc.setFont('helvetica', 'bold');
+      doc.text('Processing Cost: ', marginLeft, y);
 
-      if (liveness != null) {
+      doc.setFont('helvetica', 'bold');
+      doc.text(
+        cost != null ? Number(cost).toFixed(4) : '0.0000',
+        marginLeft + 32,
+        y,
+      );
+      y += 12;
+
+      // --- 3. DATA COMPARISON (SIDE BY SIDE) ---
+      const colWidth = (maxWidth - 10) / 2;
+
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'medium');
+      doc.setTextColor(37, 99, 235); // Blue for headers
+      doc.text('Document Evidence', marginLeft, y);
+      doc.text('Video/Speech Evidence', marginLeft + colWidth + 5, y);
+      y += 3;
+
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(marginLeft, y, marginLeft + maxWidth, y); // Separator Line
+      y += 8;
+
+      const details = [
+        {
+          label: 'Type/Name',
+          doc: docDetails.name || '-',
+          vid: videoDetails.name || '-',
+        },
+        {
+          label: 'Card Number',
+          doc: docDetails.card_number || '-',
+          vid: videoDetails.card_number || '-',
+        },
+        { label: 'Card Type', doc: docDetails.card_type || '-', vid: 'N/A' },
+      ];
+
+      doc.setFontSize(10); // Medium
+      details.forEach((item) => {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text(`${item.label}:`, marginLeft, y);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        // Document Column
+        doc.text(`${item.doc}`, marginLeft + 30, y);
+        // Video Column
+        doc.text(`${item.vid}`, marginLeft + colWidth + 40, y);
+
+        y += 8;
+      });
+
+      y += 5;
+
+      // --- 4. AI ANALYSIS REASONING ---
+      if (verification.reason) {
+        if (y > 250) {
+          doc.addPage();
+          y = 20;
+        }
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 41, 59);
+        doc.text('AI Verification Remark:', marginLeft, y);
+        y += 6;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
         y = addWrappedText(
           doc,
-          `Liveness Score: ${Number(liveness).toFixed(2)}%`,
+          verification.reason,
           marginLeft,
           y,
           maxWidth,
-          lineHeight,
+          5,
         );
+        y += 10;
       }
 
-      if (confidence != null) {
-        y = addWrappedText(
-          doc,
-          `Confidence Score: ${Number(confidence).toFixed(2)}%`,
-          marginLeft,
-          y,
-          maxWidth,
-          lineHeight,
-        );
-      }
+      // --- 5. IMAGE VERIFICATION SECTION ---
+      if (face.reference_photo && face.photo_frame) {
+        if (y > 180) {
+          doc.addPage();
+          y = 20;
+        }
 
-      if (cost != null) {
-        y = addWrappedText(
-          doc,
-          `Processing Cost: ${cost}`,
-          marginLeft,
-          y,
-          maxWidth,
-          lineHeight,
-        );
-      }
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(37, 99, 235);
+        doc.text('Visual Comparison', marginLeft, y);
+        y += 8;
 
-      y += 6;
-
-      // Add frame image if available
-      if (imageBase64) {
         try {
-          if (y > 200) {
-            doc.addPage();
-            y = 20;
-          }
+          doc.addImage(face.reference_photo, 'PNG', marginLeft, y, 50, 60);
+          doc.addImage(face.photo_frame, marginLeft + 70, y, 50, 60);
 
-          doc.setFont('helvetica', 'bold');
-          doc.text('Captured Frame:', marginLeft, y);
-          y += 6;
-
-          doc.addImage(
-            imageBase64,
-            'JPEG', // or 'PNG' depending on your format
-            marginLeft,
-            y,
-            80,
-            60,
-          );
-
-          y += 70;
+          doc.setFontSize(9);
+          doc.setTextColor(100, 100, 100);
+          doc.text('Reference ID Photo', marginLeft + 10, y + 65);
+          doc.text('Extracted Video Frame', marginLeft + 78, y + 65);
+          y += 75;
         } catch (err) {
-          console.error('Error adding video frame image to PDF:', err);
+          console.error('Image Render Error:', err);
         }
       }
     } else {
